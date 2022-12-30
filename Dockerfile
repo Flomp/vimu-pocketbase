@@ -17,4 +17,6 @@ RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 EXPOSE 8090
 
 COPY --from=downloader /pocketbase /usr/local/bin/pocketbase
+COPY vimu-migration.js /pb_migrations/vimu-migration.js
+RUN /usr/local/bin/pocketbase migrate
 ENTRYPOINT ["/usr/local/bin/pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/pb_data", "--publicDir=/pb_public"]
