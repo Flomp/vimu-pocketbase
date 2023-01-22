@@ -14,6 +14,6 @@ COPY migrations.js ./pb_migrations
 
 RUN go build -o /vimu-pocketbase
 
-EXPOSE 8080
+EXPOSE 8090
 
 CMD [ "/vimu-pocketbase", "serve" ]
