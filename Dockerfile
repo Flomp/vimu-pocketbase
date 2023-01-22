@@ -17,4 +17,4 @@ RUN /vimu-pocketbase migrate
 
 EXPOSE 8090
 
-ENTRYPOINT ["/vimu-pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/pb_data", "--publicDir=/pb_public"]
+ENTRYPOINT ["/vimu-pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/pb_data"]
