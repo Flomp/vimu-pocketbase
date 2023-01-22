@@ -1,22 +1,18 @@
-FROM alpine:3 as downloader
+FROM golang:1.19-alpine
 
-ARG TARGETOS
-ARG TARGETARCH
-ARG TARGETVARIANT
-ARG VERSION
+WORKDIR /
 
-ENV BUILDX_ARCH="${TARGETOS:-linux}_${TARGETARCH:-amd64}${TARGETVARIANT}"
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
 
-RUN wget https://github.com/pocketbase/pocketbase/releases/download/v${VERSION}/pocketbase_${VERSION}_${BUILDX_ARCH}.zip \
-    && unzip pocketbase_${VERSION}_${BUILDX_ARCH}.zip \
-    && chmod +x /pocketbase
+COPY *.go ./
 
-FROM alpine:3
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN mkdir /pb_migrations
+COPY migrations.js ./pb_migrations
 
-EXPOSE 8090
+RUN go build -o /vimu-pocketbase
 
-COPY --from=downloader /pocketbase /usr/local/bin/pocketbase
-COPY vimu-migration.js /pb_migrations/vimu-migration.js
-RUN /usr/local/bin/pocketbase migrate
-ENTRYPOINT ["/usr/local/bin/pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/pb_data", "--publicDir=/pb_public"]
+EXPOSE 8080
+
+CMD [ "/vimu-pocketbase serve" ]
