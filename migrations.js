@@ -33,7 +33,7 @@ migrate((db) => {
         "manageRule": null,
         "minPasswordLength": 8,
         "onlyEmailDomains": null,
-        "requireEmail": false
+        "requireEmail": true
       }
     },
     {
@@ -93,6 +93,19 @@ migrate((db) => {
           "required": false,
           "unique": false,
           "options": {}
+        },
+        {
+          "id": "p7qtcgmp",
+          "name": "meta",
+          "type": "relation",
+          "system": false,
+          "required": false,
+          "unique": true,
+          "options": {
+            "maxSelect": 1,
+            "collectionId": "6dqgglubeh5alx5",
+            "cascadeDelete": false
+          }
         },
         {
           "id": "34wtunfq",
@@ -224,26 +237,13 @@ migrate((db) => {
             "max": null,
             "pattern": ""
           }
-        },
-        {
-          "id": "zdlcfo51",
-          "name": "score",
-          "type": "relation",
-          "system": false,
-          "required": true,
-          "unique": true,
-          "options": {
-            "maxSelect": 1,
-            "collectionId": "1b8m8nuntgbyzal",
-            "cascadeDelete": true
-          }
         }
       ],
-      "listRule": "@request.auth.id != \"\" && (score.owner = @request.auth.id || score.public = true)",
-      "viewRule": "@request.auth.id != \"\" && (score.owner = @request.auth.id || score.public = true)",
+      "listRule": "@request.auth.id != \"\" && @collection.scores.meta = id && (@collection.scores.owner = @request.auth.id || @collection.scores.public = true)",
+      "viewRule": "@request.auth.id != \"\" && @collection.scores.meta = id && (@collection.scores.owner = @request.auth.id || @collection.scores.public = true)",
       "createRule": "",
-      "updateRule": "@request.auth.id != \"\" && score.owner = @request.auth.id",
-      "deleteRule": "@request.auth.id != \"\" && score.owner = @request.auth.id",
+      "updateRule": "@request.auth.id != \"\" && @collection.scores.meta = id && (@collection.scores.owner = @request.auth.id)",
+      "deleteRule": "@request.auth.id != \"\" && @collection.scores.meta = id && (@collection.scores.owner = @request.auth.id)",
       "options": {}
     },
     {
@@ -310,8 +310,8 @@ migrate((db) => {
           }
         }
       ],
-      "listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ~ @request.auth.id)",
-      "viewRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ~ @request.auth.id || public = true)",
+      "listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?~ @request.auth.id)",
+      "viewRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?~ @request.auth.id || public = true)",
       "createRule": "@request.auth.id != \"\" && (owner = @request.auth.id)",
       "updateRule": "@request.auth.id != \"\" && (owner = @request.auth.id)",
       "deleteRule": "@request.auth.id != \"\" && (owner = @request.auth.id)",
@@ -347,9 +347,9 @@ migrate((db) => {
         }
       ],
       "listRule": "@request.auth.id != \"\" && file.owner = @request.auth.id",
-      "viewRule": "@request.auth.id != \"\" && (file.owner = @request.auth.id || file.collaborators.user.id = @request.auth.id)",
+      "viewRule": "@request.auth.id != \"\" && (file.owner = @request.auth.id || file.collaborators.user.id ?= @request.auth.id)",
       "createRule": "@request.auth.id != \"\" && file.owner = @request.auth.id",
-      "updateRule": "@request.auth.id != \"\" && (file.owner = @request.auth.id || (file.collaborators.user.id = @request.auth.id && file.collaborators.permission = \"edit\"))",
+      "updateRule": "@request.auth.id != \"\" && (file.owner = @request.auth.id || (file.collaborators.user.id ?= @request.auth.id && file.collaborators.permission = \"edit\"))",
       "deleteRule": "@request.auth.id != \"\" && file.owner = @request.auth.id",
       "options": {}
     },
@@ -388,8 +388,8 @@ migrate((db) => {
           }
         }
       ],
-      "listRule": "@request.auth.id != \"\" && (user = @request.auth.id ||(@collection.files.collaborators.id ?= id && @collection.files.owner = @request.auth.id))",
-      "viewRule": "@request.auth.id != \"\" && (user = @request.auth.id ||(@collection.files.collaborators.id ?= id && @collection.files.owner = @request.auth.id))",
+      "listRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && (@collection.files.owner = @request.auth.id || user = @request.auth.id))",
+      "viewRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && (@collection.files.owner = @request.auth.id || user = @request.auth.id))",
       "createRule": "@request.auth.id != \"\" && @collection.subscriptions.user = @request.auth.id",
       "updateRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && @collection.files.owner = @request.auth.id) && @collection.subscriptions.user = @request.auth.id",
       "deleteRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && @collection.files.owner = @request.auth.id) && @collection.subscriptions.user = @request.auth.id",
@@ -402,20 +402,7 @@ migrate((db) => {
       "system": false,
       "schema": [
         {
-          "id": "mpxd9cuk",
-          "name": "stripe_customer_id",
-          "type": "text",
-          "system": false,
-          "required": true,
-          "unique": true,
-          "options": {
-            "min": null,
-            "max": null,
-            "pattern": ""
-          }
-        },
-        {
-          "id": "awwnvckx",
+          "id": "wejd2o0q",
           "name": "stripe_subscription_id",
           "type": "text",
           "system": false,
@@ -428,12 +415,12 @@ migrate((db) => {
           }
         },
         {
-          "id": "yey6jq6x",
-          "name": "status",
+          "id": "mpxd9cuk",
+          "name": "stripe_customer_id",
           "type": "text",
           "system": false,
           "required": true,
-          "unique": false,
+          "unique": true,
           "options": {
             "min": null,
             "max": null,
@@ -451,6 +438,26 @@ migrate((db) => {
             "maxSelect": 1,
             "collectionId": "_pb_users_auth_",
             "cascadeDelete": true
+          }
+        },
+        {
+          "id": "beu25egs",
+          "name": "status",
+          "type": "select",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": [
+              "active",
+              "past_due",
+              "unpaid",
+              "canceled",
+              "incomplete",
+              "incomplete_expired",
+              "trialing"
+            ]
           }
         }
       ],
