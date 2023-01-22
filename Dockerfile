@@ -16,4 +16,4 @@ RUN go build -o /vimu-pocketbase
 
 EXPOSE 8080
 
-CMD [ "/vimu-pocketbase serve" ]
+CMD [ "/vimu-pocketbase", "serve" ]
