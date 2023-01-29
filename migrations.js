@@ -123,7 +123,7 @@ migrate((db) => {
       ],
       "listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || public = true)",
       "viewRule": "@request.auth.id != \"\" && (owner = @request.auth.id || public = true)",
-      "createRule": "",
+      "createRule": "@request.auth.id != \"\" && owner = @request.auth.id",
       "updateRule": "@request.auth.id != \"\" && (owner = @request.auth.id)",
       "deleteRule": "@request.auth.id != \"\" && (owner = @request.auth.id)",
       "options": {}
@@ -240,10 +240,10 @@ migrate((db) => {
         }
       ],
       "listRule": "@request.auth.id != \"\" && @collection.scores.meta = id && (@collection.scores.owner = @request.auth.id || @collection.scores.public = true)",
-      "viewRule": "@request.auth.id != \"\" && @collection.scores.meta = id && (@collection.scores.owner = @request.auth.id || @collection.scores.public = true)",
-      "createRule": "",
-      "updateRule": "@request.auth.id != \"\" && @collection.scores.meta = id && (@collection.scores.owner = @request.auth.id)",
-      "deleteRule": "@request.auth.id != \"\" && @collection.scores.meta = id && (@collection.scores.owner = @request.auth.id)",
+      "viewRule": "@request.auth.id != \"\" && @collection.scores.meta ?= id && (@collection.scores.owner ?= @request.auth.id || @collection.scores.public ?= true)",
+      "createRule": "@request.auth.id != \"\"",
+      "updateRule": "@request.auth.id != \"\" && @collection.scores.meta ?= id && (@collection.scores.owner ?= @request.auth.id)",
+      "deleteRule": "@request.auth.id != \"\" && @collection.scores.meta ?= id && (@collection.scores.owner ?= @request.auth.id)",
       "options": {}
     },
     {
@@ -310,9 +310,9 @@ migrate((db) => {
           }
         }
       ],
-      "listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?~ @request.auth.id)",
-      "viewRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?~ @request.auth.id || public = true)",
-      "createRule": "@request.auth.id != \"\" && (owner = @request.auth.id)",
+      "listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || public = true)",
+      "viewRule": "owner = @request.auth.id || collaborators.user ?= @request.auth.id || public = true",
+      "createRule": "@request.auth.id != \"\" && (@request.data.owner = @request.auth.id)",
       "updateRule": "@request.auth.id != \"\" && (owner = @request.auth.id)",
       "deleteRule": "@request.auth.id != \"\" && (owner = @request.auth.id)",
       "options": {}
@@ -344,10 +344,23 @@ migrate((db) => {
             "collectionId": "2xrpwt0zs5kyuel",
             "cascadeDelete": true
           }
+        },
+        {
+          "id": "kkfic81n",
+          "name": "editors",
+          "type": "relation",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {
+            "maxSelect": null,
+            "collectionId": "8elpvo708zjue5o",
+            "cascadeDelete": false
+          }
         }
       ],
       "listRule": "@request.auth.id != \"\" && file.owner = @request.auth.id",
-      "viewRule": "@request.auth.id != \"\" && (file.owner = @request.auth.id || file.collaborators.user.id ?= @request.auth.id)",
+      "viewRule": "file.owner = @request.auth.id || file.collaborators.user.id ?= @request.auth.id || file.public = true",
       "createRule": "@request.auth.id != \"\" && file.owner = @request.auth.id",
       "updateRule": "@request.auth.id != \"\" && (file.owner = @request.auth.id || (file.collaborators.user.id ?= @request.auth.id && file.collaborators.permission = \"edit\"))",
       "deleteRule": "@request.auth.id != \"\" && file.owner = @request.auth.id",
@@ -388,10 +401,10 @@ migrate((db) => {
           }
         }
       ],
-      "listRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && (@collection.files.owner = @request.auth.id || user = @request.auth.id))",
-      "viewRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && (@collection.files.owner = @request.auth.id || user = @request.auth.id))",
-      "createRule": "@request.auth.id != \"\" && @collection.subscriptions.user = @request.auth.id",
-      "updateRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && @collection.files.owner = @request.auth.id) && @collection.subscriptions.user = @request.auth.id",
+      "listRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && (@collection.files.owner ?= @request.auth.id || user = @request.auth.id))",
+      "viewRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && (@collection.files.owner ?= @request.auth.id || user = @request.auth.id))",
+      "createRule": "@request.auth.id != \"\" && @collection.subscriptions.user ?= @request.auth.id",
+      "updateRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && @collection.files.owner ?= @request.auth.id) && @collection.subscriptions.user = @request.auth.id",
       "deleteRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && @collection.files.owner = @request.auth.id) && @collection.subscriptions.user = @request.auth.id",
       "options": {}
     },
@@ -463,6 +476,220 @@ migrate((db) => {
       ],
       "listRule": "@request.auth.id != \"\" && user = @request.auth.id",
       "viewRule": null,
+      "createRule": null,
+      "updateRule": null,
+      "deleteRule": null,
+      "options": {}
+    },
+    {
+      "id": "4xryl53w59yf60r",
+      "name": "email_settings",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "gplgb9it",
+          "name": "share",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "fileho6h",
+          "name": "team",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "kfd6flzq",
+          "name": "changelog",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "tnzwgf0l",
+          "name": "marketing",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "ngkeik6n",
+          "name": "user",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "unique": true,
+          "options": {
+            "maxSelect": 1,
+            "collectionId": "_pb_users_auth_",
+            "cascadeDelete": true
+          }
+        }
+      ],
+      "listRule": "@request.auth.id != \"\" && user = @request.auth.id",
+      "viewRule": null,
+      "createRule": "@request.auth.id != \"\" && @request.data.user = @request.auth.id",
+      "updateRule": "@request.auth.id != \"\" && user = @request.auth.id",
+      "deleteRule": null,
+      "options": {}
+    },
+    {
+      "id": "57e7nnymic6xocc",
+      "name": "editor_settings",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "cdgpvxnp",
+          "name": "score",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "hpccaheo",
+          "name": "plot",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "ohdclhzk",
+          "name": "minimap",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "np2fxdaw",
+          "name": "pixel_grid",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "3a4r1f0o",
+          "name": "grid_columns",
+          "type": "text",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "zvd6la8d",
+          "name": "grid_rows",
+          "type": "text",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "3pblqibc",
+          "name": "tutorial_completed",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "77bfob6c",
+          "name": "user",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "unique": true,
+          "options": {
+            "maxSelect": 1,
+            "collectionId": "_pb_users_auth_",
+            "cascadeDelete": true
+          }
+        }
+      ],
+      "listRule": "@request.auth.id != \"\" && user = @request.auth.id",
+      "viewRule": null,
+      "createRule": "@request.auth.id != \"\" && user = @request.auth.id",
+      "updateRule": "@request.auth.id != \"\" && user = @request.auth.id",
+      "deleteRule": null,
+      "options": {}
+    },
+    {
+      "id": "8elpvo708zjue5o",
+      "name": "file_data_editors",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "sdgjd51w",
+          "name": "file_data",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "collectionId": "bfgxjojefgb666z",
+            "cascadeDelete": true
+          }
+        },
+        {
+          "id": "wqkixi6e",
+          "name": "user",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "collectionId": "_pb_users_auth_",
+            "cascadeDelete": true
+          }
+        },
+        {
+          "id": "nkem7mkd",
+          "name": "subscription_id",
+          "type": "text",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        }
+      ],
+      "listRule": "@request.auth.id != \"\" && (file_data.file.owner = @request.auth.id || file_data.file.collaborators.user.id ?= @request.auth.id)",
+      "viewRule": "@request.auth.id != \"\" && (file_data.file.owner = @request.auth.id || file_data.file.collaborators.user.id ?= @request.auth.id)",
       "createRule": null,
       "updateRule": null,
       "deleteRule": null,
