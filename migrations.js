@@ -102,9 +102,10 @@ migrate((db) => {
           "required": false,
           "unique": true,
           "options": {
-            "maxSelect": 1,
             "collectionId": "6dqgglubeh5alx5",
-            "cascadeDelete": false
+            "cascadeDelete": false,
+            "maxSelect": 1,
+            "displayFields": null
           }
         },
         {
@@ -115,9 +116,10 @@ migrate((db) => {
           "required": false,
           "unique": false,
           "options": {
-            "maxSelect": 1,
             "collectionId": "_pb_users_auth_",
-            "cascadeDelete": true
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
           }
         }
       ],
@@ -266,15 +268,6 @@ migrate((db) => {
           }
         },
         {
-          "id": "imchaigi",
-          "name": "favorite",
-          "type": "bool",
-          "system": false,
-          "required": false,
-          "unique": false,
-          "options": {}
-        },
-        {
           "id": "an4uo2nc",
           "name": "public",
           "type": "bool",
@@ -291,9 +284,10 @@ migrate((db) => {
           "required": true,
           "unique": false,
           "options": {
-            "maxSelect": 1,
             "collectionId": "_pb_users_auth_",
-            "cascadeDelete": true
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
           }
         },
         {
@@ -304,17 +298,32 @@ migrate((db) => {
           "required": false,
           "unique": false,
           "options": {
-            "maxSelect": null,
             "collectionId": "v6gkd5kd64fmyuv",
-            "cascadeDelete": false
+            "cascadeDelete": false,
+            "maxSelect": null,
+            "displayFields": null
+          }
+        },
+        {
+          "id": "kayabqel",
+          "name": "team",
+          "type": "relation",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {
+            "collectionId": "nrmy6xhnaygd60n",
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
           }
         }
       ],
-      "listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || public = true)",
-      "viewRule": "owner = @request.auth.id || collaborators.user ?= @request.auth.id || public = true",
+      "listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || \n team.owner = @request.auth.id || (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id) || public = true)",
+      "viewRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || \n team.owner = @request.auth.id ||  \n  (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id) || public = true)",
       "createRule": "@request.auth.id != \"\" && (@request.data.owner = @request.auth.id)",
-      "updateRule": "@request.auth.id != \"\" && (owner = @request.auth.id)",
-      "deleteRule": "@request.auth.id != \"\" && (owner = @request.auth.id)",
+      "updateRule": "@request.auth.id != \"\" && (owner = @request.auth.id || \n team.owner = @request.auth.id ||  (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id && @collection.team_members.permission = \"edit\"))",
+      "deleteRule": "@request.auth.id != \"\" && (owner = @request.auth.id|| \n team.owner = @request.auth.id ||  (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id && @collection.team_members.permission = \"edit\"))",
       "options": {}
     },
     {
@@ -340,9 +349,10 @@ migrate((db) => {
           "required": true,
           "unique": true,
           "options": {
-            "maxSelect": 1,
             "collectionId": "2xrpwt0zs5kyuel",
-            "cascadeDelete": true
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
           }
         },
         {
@@ -353,16 +363,17 @@ migrate((db) => {
           "required": false,
           "unique": false,
           "options": {
-            "maxSelect": null,
             "collectionId": "8elpvo708zjue5o",
-            "cascadeDelete": false
+            "cascadeDelete": false,
+            "maxSelect": null,
+            "displayFields": null
           }
         }
       ],
       "listRule": "@request.auth.id != \"\" && file.owner = @request.auth.id",
-      "viewRule": "file.owner = @request.auth.id || file.collaborators.user.id ?= @request.auth.id || file.public = true",
+      "viewRule": "file.owner = @request.auth.id || file.collaborators.user.id ?= @request.auth.id || \n file.team.owner = @request.auth.id || (@collection.team_members.team = file.team && @collection.team_members.user = @request.auth.id) || file.public = true",
       "createRule": "@request.auth.id != \"\" && file.owner = @request.auth.id",
-      "updateRule": "@request.auth.id != \"\" && (file.owner = @request.auth.id || (file.collaborators.user.id ?= @request.auth.id && file.collaborators.permission = \"edit\"))",
+      "updateRule": "@request.auth.id != \"\" && (file.owner = @request.auth.id || \n file.team.owner = @request.auth.id || (file.collaborators.user.id ?= @request.auth.id && file.collaborators.permission = \"edit\") ||\n(@collection.team_members.team = file.team && @collection.team_members.user = @request.auth.id && @collection.team_members.permission = \"edit\"))",
       "deleteRule": "@request.auth.id != \"\" && file.owner = @request.auth.id",
       "options": {}
     },
@@ -395,9 +406,10 @@ migrate((db) => {
           "required": true,
           "unique": false,
           "options": {
-            "maxSelect": 1,
             "collectionId": "_pb_users_auth_",
-            "cascadeDelete": true
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
           }
         }
       ],
@@ -405,7 +417,7 @@ migrate((db) => {
       "viewRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && (@collection.files.owner ?= @request.auth.id || user = @request.auth.id))",
       "createRule": "@request.auth.id != \"\" && @collection.subscriptions.user ?= @request.auth.id",
       "updateRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && @collection.files.owner ?= @request.auth.id) && @collection.subscriptions.user = @request.auth.id",
-      "deleteRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && @collection.files.owner = @request.auth.id) && @collection.subscriptions.user = @request.auth.id",
+      "deleteRule": "@request.auth.id != \"\" && (@collection.files.collaborators.id ?= id && @collection.files.owner ?= @request.auth.id) && @collection.subscriptions.user = @request.auth.id",
       "options": {}
     },
     {
@@ -448,9 +460,10 @@ migrate((db) => {
           "required": true,
           "unique": true,
           "options": {
-            "maxSelect": 1,
             "collectionId": "_pb_users_auth_",
-            "cascadeDelete": true
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
           }
         },
         {
@@ -531,9 +544,10 @@ migrate((db) => {
           "required": true,
           "unique": true,
           "options": {
-            "maxSelect": 1,
             "collectionId": "_pb_users_auth_",
-            "cascadeDelete": true
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
           }
         }
       ],
@@ -629,10 +643,89 @@ migrate((db) => {
           "required": true,
           "unique": true,
           "options": {
-            "maxSelect": 1,
             "collectionId": "_pb_users_auth_",
-            "cascadeDelete": true
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
           }
+        },
+        {
+          "id": "gvtzqjkr",
+          "name": "player_volume",
+          "type": "number",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {
+            "min": 0,
+            "max": 100
+          }
+        },
+        {
+          "id": "ghgkikvd",
+          "name": "player_tempo",
+          "type": "number",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": 20,
+            "max": 240
+          }
+        },
+        {
+          "id": "mgeggtsk",
+          "name": "display_show_title",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "t5rwuqja",
+          "name": "display_show_composer",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "fosdbpep",
+          "name": "display_show_lyrics",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "ticnxzj3",
+          "name": "display_show_measure_numbers",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "2dfphp5c",
+          "name": "display_follow_cursor",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
+        },
+        {
+          "id": "pjeaefsk",
+          "name": "display_show_part_names",
+          "type": "bool",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {}
         }
       ],
       "listRule": "@request.auth.id != \"\" && user = @request.auth.id",
@@ -656,9 +749,10 @@ migrate((db) => {
           "required": true,
           "unique": false,
           "options": {
-            "maxSelect": 1,
             "collectionId": "bfgxjojefgb666z",
-            "cascadeDelete": true
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
           }
         },
         {
@@ -669,9 +763,10 @@ migrate((db) => {
           "required": true,
           "unique": false,
           "options": {
-            "maxSelect": 1,
             "collectionId": "_pb_users_auth_",
-            "cascadeDelete": true
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
           }
         },
         {
@@ -688,14 +783,191 @@ migrate((db) => {
           }
         }
       ],
-      "listRule": "@request.auth.id != \"\" && (file_data.file.owner = @request.auth.id || file_data.file.collaborators.user.id ?= @request.auth.id)",
-      "viewRule": "@request.auth.id != \"\" && (file_data.file.owner = @request.auth.id || file_data.file.collaborators.user.id ?= @request.auth.id)",
+      "listRule": "@request.auth.id != \"\" && (file_data.file.owner = @request.auth.id || file_data.file.collaborators.user.id ?= @request.auth.id || file_data.file.team.owner = @request.auth.id || (@collection.team_members.team = file_data.file.team && @collection.team_members.user = @request.auth.id))",
+      "viewRule": "@request.auth.id != \"\" && (file_data.file.owner = @request.auth.id || file_data.file.collaborators.user.id ?= @request.auth.id || file_data.file.team.owner = @request.auth.id || (@collection.team_members.team = file_data.file.team && @collection.team_members.user = @request.auth.id))",
       "createRule": null,
       "updateRule": null,
       "deleteRule": null,
       "options": {}
+    },
+    {
+      "id": "nrmy6xhnaygd60n",
+      "name": "teams",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "ru3bbk8w",
+          "name": "name",
+          "type": "text",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "min": null,
+            "max": null,
+            "pattern": ""
+          }
+        },
+        {
+          "id": "krvzxchb",
+          "name": "icon",
+          "type": "file",
+          "system": false,
+          "required": false,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "maxSize": 5242880,
+            "mimeTypes": [
+              "image/png",
+              "image/jpeg",
+              "image/svg+xml"
+            ],
+            "thumbs": []
+          }
+        },
+        {
+          "id": "jyufjk4j",
+          "name": "owner",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "_pb_users_auth_",
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
+          }
+        }
+      ],
+      "listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || (@collection.team_members.team = id && @collection.team_members.user = @request.auth.id && @collection.team_members.status = \"active\"))",
+      "viewRule": "@request.auth.id != \"\" && (owner = @request.auth.id || (@collection.team_members.team = id && @collection.team_members.user = @request.auth.id && @collection.team_members.status = \"active\"))",
+      "createRule": "@request.auth.id != \"\" && @collection.subscriptions.user ?= @request.auth.id",
+      "updateRule": "@request.auth.id != \"\" && @collection.subscriptions.user ?= @request.auth.id && owner = @request.auth.id",
+      "deleteRule": "@request.auth.id != \"\" && @collection.subscriptions.user ?= @request.auth.id && owner = @request.auth.id",
+      "options": {}
+    },
+    {
+      "id": "z79hqmr1d6axug2",
+      "name": "team_members",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "iary9ewd",
+          "name": "team",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "nrmy6xhnaygd60n",
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
+          }
+        },
+        {
+          "id": "pu8plxez",
+          "name": "user",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "_pb_users_auth_",
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": null
+          }
+        },
+        {
+          "id": "9rowcerb",
+          "name": "permission",
+          "type": "select",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": [
+              "view",
+              "edit"
+            ]
+          }
+        },
+        {
+          "id": "nw9ikmmd",
+          "name": "status",
+          "type": "select",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "maxSelect": 1,
+            "values": [
+              "pending",
+              "active"
+            ]
+          }
+        }
+      ],
+      "listRule": "@request.auth.id != \"\" && (team.owner = @request.auth.id || user = @request.auth.id)",
+      "viewRule": "@request.auth.id != \"\" &&  (team.owner = @request.auth.id || user = @request.auth.id)",
+      "createRule": "@request.auth.id != \"\" && @collection.subscriptions.user ?= @request.auth.id && team.owner = @request.auth.id",
+      "updateRule": "@request.auth.id != \"\" && ((user.id = @request.auth.id && \n@request.data.status = \"active\" && @request.data.permission:isset = false) || team.owner = @request.auth.id)",
+      "deleteRule": "@request.auth.id != \"\" && (team.owner = @request.auth.id || user = @request.auth.id)",
+      "options": {}
+    },
+    {
+      "id": "2y3culndctnplgp",
+      "name": "file_favorites",
+      "type": "base",
+      "system": false,
+      "schema": [
+        {
+          "id": "75jfhncm",
+          "name": "file",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "2xrpwt0zs5kyuel",
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": [
+              "id"
+            ]
+          }
+        },
+        {
+          "id": "g076dsnx",
+          "name": "user",
+          "type": "relation",
+          "system": false,
+          "required": true,
+          "unique": false,
+          "options": {
+            "collectionId": "_pb_users_auth_",
+            "cascadeDelete": true,
+            "maxSelect": 1,
+            "displayFields": [
+              "id"
+            ]
+          }
+        }
+      ],
+      "listRule": "@request.auth.id != \"\" && user = @request.auth.id",
+      "viewRule": "@request.auth.id != \"\" && user = @request.auth.id",
+      "createRule": "@request.auth.id != \"\" && @request.data.user = @request.auth.id",
+      "updateRule": null,
+      "deleteRule": "@request.auth.id != \"\" && user = @request.auth.id",
+      "options": {}
     }
-  ];
+  ]
 
   const collections = snapshot.map((item) => new Collection(item));
 

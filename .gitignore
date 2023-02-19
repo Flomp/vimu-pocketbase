@@ -25,3 +25,5 @@ go.work
 pb_data/
 
 vimu-pocketbase*
+
+.env
