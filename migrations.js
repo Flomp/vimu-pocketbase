@@ -319,8 +319,8 @@ migrate((db) => {
           }
         }
       ],
-      "listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || \n team.owner = @request.auth.id || (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id) || public = true)",
-      "viewRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || \n team.owner = @request.auth.id ||  \n  (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id) || public = true)",
+      "listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || \n team.owner = @request.auth.id || (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id)) || public = true",
+      "viewRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || \n team.owner = @request.auth.id ||  \n  (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id)) || public = true",
       "createRule": "@request.auth.id != \"\" && (@request.data.owner = @request.auth.id)",
       "updateRule": "@request.auth.id != \"\" && (owner = @request.auth.id || \n team.owner = @request.auth.id ||  (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id && @collection.team_members.permission = \"edit\"))",
       "deleteRule": "@request.auth.id != \"\" && (owner = @request.auth.id|| \n team.owner = @request.auth.id ||  (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id && @collection.team_members.permission = \"edit\"))",

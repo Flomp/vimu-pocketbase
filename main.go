@@ -158,7 +158,7 @@ func main() {
 				Address: app.Settings().Meta.SenderAddress,
 				Name:    app.Settings().Meta.SenderName,
 			},
-			To:      mail.Address{Address: user.Email()},
+			To:      []mail.Address{{Address: user.Email()}},
 			Subject: subject,
 			HTML: fmt.Sprintf(`
 			<div style="max-width: 650px; margin: auto"><svg width="128" viewBox="0 0 464 190" fill="none"
