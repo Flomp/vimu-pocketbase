@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"net/mail"
 	"os"
 	"strings"
 
+	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
@@ -15,6 +18,9 @@ import (
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/tools/list"
 	"github.com/pocketbase/pocketbase/tools/mailer"
+
+	"github.com/stripe/stripe-go"
+	"github.com/stripe/stripe-go/webhook"
 )
 
 func findTotalFilesByOwner(dao *daos.Dao, collection *models.Collection, ownerId string) (int, error) {
@@ -79,6 +85,8 @@ func getFilePermission(app *pocketbase.PocketBase, fileRecord *models.Record, au
 }
 
 func main() {
+	stripe.Key = os.Getenv("STRIPE_API_KEY")
+
 	app := pocketbase.New()
 
 	app.OnRecordsListRequest("files").Add(func(e *core.RecordsListEvent) error {
@@ -273,6 +281,109 @@ func main() {
 				return err
 			}
 		}
+		return nil
+	})
+
+	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		e.Router.AddRoute(echo.Route{
+			Method: http.MethodPost,
+			Path:   "/api/stripe/webhook",
+			Handler: func(c echo.Context) error {
+				collection, err := app.Dao().FindCollectionByNameOrId("subscriptions")
+				if err != nil {
+					return err
+				}
+				request := c.Request()
+
+				payload, err := io.ReadAll(request.Body)
+				if err != nil {
+					return apis.NewBadRequestError("Error reading request body", err)
+				}
+
+				endpointSecret := os.Getenv("STRIPE_WEBHOOK_SECRET")
+
+				// Pass the request body and Stripe-Signature header to ConstructEvent, along
+				// with the webhook signing key.
+				event, err := webhook.ConstructEvent(payload, request.Header.Get("Stripe-Signature"),
+					endpointSecret)
+
+				if err != nil {
+					return apis.NewBadRequestError("Error verifying webhook signature", err)
+				}
+
+				dataObject := event.Data.Object
+
+				// Unmarshal the event data into an appropriate struct depending on its Type
+				switch event.Type {
+				case "checkout.session.completed":
+					userId := dataObject["client_reference_id"]
+					stripeCustomerId := dataObject["customer"]
+					stripeSubscriptionId := dataObject["subscription"]
+
+					record := models.NewRecord(collection)
+					record.Set("stripe_subscription_id", stripeSubscriptionId)
+					record.Set("stripe_customer_id", stripeCustomerId)
+					record.Set("user", userId)
+					record.Set("status", "active")
+
+					if err := app.Dao().SaveRecord(record); err != nil {
+						return err
+					}
+
+				case "invoice.paid":
+					stripeSubscriptionId := dataObject["stripe_id"]
+					record, err := app.Dao().FindFirstRecordByData("subscriptions", "stripe_subscription_id", stripeSubscriptionId)
+					if err != nil {
+						return err
+					}
+
+					record.Set("status", "active")
+
+					if err := app.Dao().SaveRecord(record); err != nil {
+						return err
+					}
+
+				case "invoice.payment_failed":
+					stripeSubscriptionId := dataObject["stripe_id"]
+					record, err := app.Dao().FindFirstRecordByData("subscriptions", "stripe_subscription_id", stripeSubscriptionId)
+					if err != nil {
+						return err
+					}
+
+					record.Set("status", "unpaid")
+
+					if err := app.Dao().SaveRecord(record); err != nil {
+						return err
+					}
+				case "customer.subscription.updated":
+					stripeSubscriptionId := dataObject["stripe_id"]
+					record, err := app.Dao().FindFirstRecordByData("subscriptions", "stripe_subscription_id", stripeSubscriptionId)
+					if err != nil {
+						return err
+					}
+					status := dataObject["status"]
+					record.Set("status", status)
+
+					if err := app.Dao().SaveRecord(record); err != nil {
+						return err
+					}
+				case "customer.subscription.deleted":
+					stripeSubscriptionId := dataObject["stripe_id"]
+					record, err := app.Dao().FindFirstRecordByData("subscriptions", "stripe_subscription_id", stripeSubscriptionId)
+					if err != nil {
+						return err
+					}
+
+					if err := app.Dao().DeleteRecord(record); err != nil {
+						return err
+					}
+				default:
+					fmt.Fprintf(os.Stderr, "Unhandled event type: %s\n", event.Type)
+				}
+
+				return c.JSON(http.StatusOK, nil)
+			},
+		})
 		return nil
 	})
 
