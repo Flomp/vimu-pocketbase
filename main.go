@@ -19,9 +19,27 @@ import (
 	"github.com/pocketbase/pocketbase/tools/list"
 	"github.com/pocketbase/pocketbase/tools/mailer"
 
-	"github.com/stripe/stripe-go"
-	"github.com/stripe/stripe-go/webhook"
+	"github.com/stripe/stripe-go/v74"
+	"github.com/stripe/stripe-go/v74/checkout/session"
+	"github.com/stripe/stripe-go/v74/invoice"
+	"github.com/stripe/stripe-go/v74/webhook"
 )
+
+type APIResponse struct {
+	Status string `json:"status"`
+	Data   any    `json:"data"`
+	Error  any    `json:"error"`
+}
+
+type StripeSessionRequest struct {
+	PriceId string `json:"price_id"`
+	Email   string `json:"email"`
+	UserId  string `json:"user_id"`
+}
+
+type StripeCustomer struct {
+	Id string `query:"id"`
+}
 
 func findTotalFilesByOwner(dao *daos.Dao, collection *models.Collection, ownerId string) (int, error) {
 	var total int
@@ -287,6 +305,60 @@ func main() {
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		e.Router.AddRoute(echo.Route{
 			Method: http.MethodPost,
+			Path:   "/api/stripe/session",
+			Handler: func(c echo.Context) error {
+				var request StripeSessionRequest
+				err := c.Bind(&request)
+				if err != nil {
+					return apis.NewBadRequestError("Bad request", err)
+				}
+
+				params := &stripe.CheckoutSessionParams{
+					LineItems: []*stripe.CheckoutSessionLineItemParams{
+						{
+							Price:    stripe.String(request.PriceId),
+							Quantity: stripe.Int64(1),
+						},
+					},
+					Mode:              stripe.String("subscription"),
+					SuccessURL:        stripe.String("https://vimu.app/dashboard/account/subscription?session_id={CHECKOUT_SESSION_ID}"),
+					CancelURL:         stripe.String("https://vimu.app/dashboard/account/subscription"),
+					CustomerEmail:     &request.Email,
+					ClientReferenceID: &request.UserId,
+				}
+				s, _ := session.New(params)
+				r := &APIResponse{
+					Status: "success",
+					Data:   s.URL,
+					Error:  nil,
+				}
+				return c.JSON(http.StatusOK, r)
+			},
+		})
+		e.Router.AddRoute(echo.Route{
+			Method: http.MethodGet,
+			Path:   "/api/stripe/invoice",
+			Handler: func(c echo.Context) error {
+				var request StripeCustomer
+				err := c.Bind(&request)
+				if err != nil {
+					return apis.NewBadRequestError("Bad request", err)
+				}
+
+				params := &stripe.InvoiceListParams{}
+				params.Filters.AddFilter("limit", "", "3")
+				i := invoice.List(params)
+
+				r := &APIResponse{
+					Status: "success",
+					Data:   i.InvoiceList().Data,
+					Error:  nil,
+				}
+				return c.JSON(http.StatusOK, r)
+			},
+		})
+		e.Router.AddRoute(echo.Route{
+			Method: http.MethodPost,
 			Path:   "/api/stripe/webhook",
 			Handler: func(c echo.Context) error {
 				collection, err := app.Dao().FindCollectionByNameOrId("subscriptions")
@@ -331,10 +403,10 @@ func main() {
 					}
 
 				case "invoice.paid":
-					stripeSubscriptionId := dataObject["stripe_id"]
+					stripeSubscriptionId := dataObject["id"]
 					record, err := app.Dao().FindFirstRecordByData("subscriptions", "stripe_subscription_id", stripeSubscriptionId)
 					if err != nil {
-						return err
+						return apis.NewBadRequestError("Subscription not found", err)
 					}
 
 					record.Set("status", "active")
@@ -344,10 +416,10 @@ func main() {
 					}
 
 				case "invoice.payment_failed":
-					stripeSubscriptionId := dataObject["stripe_id"]
+					stripeSubscriptionId := dataObject["id"]
 					record, err := app.Dao().FindFirstRecordByData("subscriptions", "stripe_subscription_id", stripeSubscriptionId)
 					if err != nil {
-						return err
+						return apis.NewBadRequestError("Subscription not found", err)
 					}
 
 					record.Set("status", "unpaid")
@@ -356,10 +428,11 @@ func main() {
 						return err
 					}
 				case "customer.subscription.updated":
-					stripeSubscriptionId := dataObject["stripe_id"]
+					stripeSubscriptionId := dataObject["id"]
+
 					record, err := app.Dao().FindFirstRecordByData("subscriptions", "stripe_subscription_id", stripeSubscriptionId)
 					if err != nil {
-						return err
+						return apis.NewBadRequestError("Subscription not found", err)
 					}
 					status := dataObject["status"]
 					record.Set("status", status)
@@ -368,10 +441,10 @@ func main() {
 						return err
 					}
 				case "customer.subscription.deleted":
-					stripeSubscriptionId := dataObject["stripe_id"]
+					stripeSubscriptionId := dataObject["id"]
 					record, err := app.Dao().FindFirstRecordByData("subscriptions", "stripe_subscription_id", stripeSubscriptionId)
 					if err != nil {
-						return err
+						return apis.NewBadRequestError("Subscription not found", err)
 					}
 
 					if err := app.Dao().DeleteRecord(record); err != nil {
