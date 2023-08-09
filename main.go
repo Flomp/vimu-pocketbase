@@ -16,6 +16,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
+	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 	"github.com/pocketbase/pocketbase/tools/list"
 	"github.com/pocketbase/pocketbase/tools/mailer"
 
@@ -106,6 +107,11 @@ func main() {
 	stripe.Key = os.Getenv("STRIPE_API_KEY")
 
 	app := pocketbase.New()
+
+	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
+        // enable auto creation of migration files when making collection changes in the Admin UI
+        Automigrate: true,
+    })
 
 	app.OnRecordsListRequest("files").Add(func(e *core.RecordsListEvent) error {
 		authRecord, _ := e.HttpContext.Get(apis.ContextAuthRecordKey).(*models.Record)
