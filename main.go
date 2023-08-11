@@ -1,5 +1,7 @@
 package main
 
+import _ "vimu-pocketbase/migrations"
+
 import (
 	"fmt"
 	"io"
