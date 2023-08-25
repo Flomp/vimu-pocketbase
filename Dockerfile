@@ -11,7 +11,8 @@ COPY *.go ./
 
 RUN go build -o /vimu-pocketbase
 
-RUN mkdir /pb_migrations
+RUN mkdir /migrations
+COPY migrations/* /migrations
 RUN /vimu-pocketbase migrate
 
 EXPOSE 8090
