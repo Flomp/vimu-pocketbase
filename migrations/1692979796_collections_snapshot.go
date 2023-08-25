@@ -15,7 +15,7 @@ func init() {
 			{
 				"id": "_pb_users_auth_",
 				"created": "2023-01-29 09:56:42.813Z",
-				"updated": "2023-07-25 17:41:13.856Z",
+				"updated": "2023-08-14 09:31:53.858Z",
 				"name": "users",
 				"type": "auth",
 				"system": false,
@@ -56,7 +56,7 @@ func init() {
 			{
 				"id": "1b8m8nuntgbyzal",
 				"created": "2023-01-29 09:57:27.358Z",
-				"updated": "2023-07-25 17:41:13.859Z",
+				"updated": "2023-08-14 09:31:53.859Z",
 				"name": "scores",
 				"type": "base",
 				"system": false,
@@ -160,7 +160,7 @@ func init() {
 			{
 				"id": "6dqgglubeh5alx5",
 				"created": "2023-01-29 09:57:27.358Z",
-				"updated": "2023-07-25 17:41:13.860Z",
+				"updated": "2023-08-14 09:31:53.859Z",
 				"name": "score_meta",
 				"type": "base",
 				"system": false,
@@ -283,7 +283,7 @@ func init() {
 			{
 				"id": "2xrpwt0zs5kyuel",
 				"created": "2023-01-29 09:57:27.358Z",
-				"updated": "2023-07-25 17:41:13.862Z",
+				"updated": "2023-08-14 19:52:52.383Z",
 				"name": "files",
 				"type": "base",
 				"system": false,
@@ -359,8 +359,8 @@ func init() {
 				"indexes": [
 					"CREATE INDEX ` + "`" + `_2xrpwt0zs5kyuel_created_idx` + "`" + ` ON ` + "`" + `files` + "`" + ` (` + "`" + `created` + "`" + `)"
 				],
-				"listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || \n team.owner = @request.auth.id || (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id) || public = true)",
-				"viewRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || \n team.owner = @request.auth.id ||  \n  (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id) || public = true)",
+				"listRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || \n team.owner = @request.auth.id || (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id)) || public = true",
+				"viewRule": "@request.auth.id != \"\" && (owner = @request.auth.id || collaborators.user ?= @request.auth.id || \n team.owner = @request.auth.id ||  \n  (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id)) || public = true",
 				"createRule": "@request.auth.id != \"\" && (@request.data.owner = @request.auth.id)",
 				"updateRule": "@request.auth.id != \"\" && (owner = @request.auth.id || \n team.owner = @request.auth.id ||  (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id && @collection.team_members.permission = \"edit\"))",
 				"deleteRule": "@request.auth.id != \"\" && (owner = @request.auth.id|| \n team.owner = @request.auth.id ||  (@collection.team_members.team = team && @collection.team_members.user = @request.auth.id && @collection.team_members.permission = \"edit\"))",
@@ -369,7 +369,7 @@ func init() {
 			{
 				"id": "bfgxjojefgb666z",
 				"created": "2023-01-29 09:57:27.358Z",
-				"updated": "2023-07-25 17:41:13.866Z",
+				"updated": "2023-08-14 09:31:53.860Z",
 				"name": "file_data",
 				"type": "base",
 				"system": false,
@@ -428,7 +428,7 @@ func init() {
 			{
 				"id": "v6gkd5kd64fmyuv",
 				"created": "2023-01-29 09:57:27.358Z",
-				"updated": "2023-07-25 17:41:13.871Z",
+				"updated": "2023-08-14 09:31:53.861Z",
 				"name": "file_share",
 				"type": "base",
 				"system": false,
@@ -477,7 +477,7 @@ func init() {
 			{
 				"id": "tqh82amh27108kk",
 				"created": "2023-01-29 09:57:27.358Z",
-				"updated": "2023-07-25 17:41:13.875Z",
+				"updated": "2023-08-14 09:31:53.861Z",
 				"name": "subscriptions",
 				"type": "base",
 				"system": false,
@@ -560,7 +560,7 @@ func init() {
 			{
 				"id": "4xryl53w59yf60r",
 				"created": "2023-01-29 09:57:27.358Z",
-				"updated": "2023-07-25 17:41:13.880Z",
+				"updated": "2023-08-14 09:31:53.862Z",
 				"name": "email_settings",
 				"type": "base",
 				"system": false,
@@ -631,7 +631,7 @@ func init() {
 			{
 				"id": "57e7nnymic6xocc",
 				"created": "2023-01-29 09:57:27.358Z",
-				"updated": "2023-07-25 17:41:13.882Z",
+				"updated": "2023-08-14 09:31:53.864Z",
 				"name": "editor_settings",
 				"type": "base",
 				"system": false,
@@ -815,7 +815,7 @@ func init() {
 			{
 				"id": "8elpvo708zjue5o",
 				"created": "2023-01-29 10:42:25.503Z",
-				"updated": "2023-07-25 17:41:13.884Z",
+				"updated": "2023-08-14 09:31:53.875Z",
 				"name": "file_data_editors",
 				"type": "base",
 				"system": false,
@@ -877,7 +877,7 @@ func init() {
 			{
 				"id": "nrmy6xhnaygd60n",
 				"created": "2023-02-18 09:49:00.105Z",
-				"updated": "2023-07-25 17:41:13.886Z",
+				"updated": "2023-08-14 09:31:53.882Z",
 				"name": "teams",
 				"type": "base",
 				"system": false,
@@ -943,7 +943,7 @@ func init() {
 			{
 				"id": "z79hqmr1d6axug2",
 				"created": "2023-02-18 09:49:00.105Z",
-				"updated": "2023-07-25 17:41:13.890Z",
+				"updated": "2023-08-14 09:31:53.886Z",
 				"name": "team_members",
 				"type": "base",
 				"system": false,
@@ -1022,7 +1022,7 @@ func init() {
 			{
 				"id": "2y3culndctnplgp",
 				"created": "2023-02-19 11:57:03.607Z",
-				"updated": "2023-07-25 17:41:13.891Z",
+				"updated": "2023-08-14 09:31:53.894Z",
 				"name": "file_favorites",
 				"type": "base",
 				"system": false,
@@ -1075,7 +1075,7 @@ func init() {
 			{
 				"id": "qschi6gclkglton",
 				"created": "2023-07-31 09:35:28.127Z",
-				"updated": "2023-08-08 19:03:22.894Z",
+				"updated": "2023-08-14 09:31:53.896Z",
 				"name": "plugins",
 				"type": "base",
 				"system": false,
