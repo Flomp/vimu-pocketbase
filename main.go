@@ -1,7 +1,5 @@
 package main
 
-import _ "vimu-pocketbase/migrations"
-
 import (
 	"fmt"
 	"io"
@@ -10,6 +8,7 @@ import (
 	"net/mail"
 	"os"
 	"strings"
+	_ "vimu-pocketbase/migrations"
 
 	"github.com/labstack/echo/v5"
 	"github.com/pocketbase/dbx"
@@ -21,7 +20,6 @@ import (
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 	"github.com/pocketbase/pocketbase/tools/list"
 	"github.com/pocketbase/pocketbase/tools/mailer"
-
 	"github.com/stripe/stripe-go/v74"
 	"github.com/stripe/stripe-go/v74/checkout/session"
 	"github.com/stripe/stripe-go/v74/invoice"
@@ -111,9 +109,9 @@ func main() {
 	app := pocketbase.New()
 
 	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
-        // enable auto creation of migration files when making collection changes in the Admin UI
-        Automigrate: true,
-    })
+		// enable auto creation of migration files when making collection changes in the Admin UI
+		Automigrate: true,
+	})
 
 	app.OnRecordsListRequest("files").Add(func(e *core.RecordsListEvent) error {
 		authRecord, _ := e.HttpContext.Get(apis.ContextAuthRecordKey).(*models.Record)

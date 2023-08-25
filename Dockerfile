@@ -5,15 +5,15 @@ WORKDIR /
 
 COPY go.mod ./
 COPY go.sum ./
+COPY migrations ./migrations
+
 RUN go mod download
 
 COPY *.go ./
 
 RUN go build -o /vimu-pocketbase
-
-RUN mkdir /migrations
-COPY migrations/* /migrations
 RUN /vimu-pocketbase migrate
+
 
 EXPOSE 8090
 
